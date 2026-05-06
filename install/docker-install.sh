@@ -24,6 +24,29 @@ echo -e '{\n  "log-driver": "journald"\n}' >/etc/docker/daemon.json
 $STD sh <(curl -fsSL https://get.docker.com)
 msg_ok "Installed Docker $DOCKER_LATEST_VERSION"
 
+install_dev_tools="${INSTALL_DEV_TOOLS:-}"
+if [[ -z "$install_dev_tools" ]]; then
+  read -r -p "${TAB3}Would you like to add Node.js + Python development tools? <y/N> " prompt_dev
+  if [[ ${prompt_dev,,} =~ ^(y|yes)$ ]]; then
+    install_dev_tools="yes"
+  fi
+fi
+
+if [[ ${install_dev_tools,,} =~ ^(y|yes|true|1)$ ]]; then
+  msg_info "Installing Development Dependencies"
+  ensure_dependencies \
+    git \
+    build-essential \
+    python3 \
+    python3-dev \
+    python3-pip \
+    python3-venv
+  msg_ok "Installed Development Dependencies"
+
+  NODE_VERSION="22" NODE_MODULE="pnpm,yarn" setup_nodejs
+  PYTHON_VERSION="3.13" setup_uv
+fi
+
 read -r -p "${TAB3}Would you like to add Portainer (UI)? <y/N> " prompt
 if [[ ${prompt,,} =~ ^(y|yes)$ ]]; then
   msg_info "Installing Portainer $PORTAINER_LATEST_VERSION"
